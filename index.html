@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+   <title>Controlling Robot</title>
+</head>
+<body>
+<p>Use arrow keys or w, s, a, d to move around.</p>
+<canvas width="250" height="250"></canvas>
+
+<style>
+canvas {
+    border: 1px solid black;
+    background-size: 50px 50px;
+    background-image: linear-gradient(to right, grey 1px, transparent 1px), linear-gradient(to bottom, grey 1px, transparent 1px);
+}
+
+
+</style>
+<script>
+
+    const SCALE = 1.1;
+    const WIDTH = 40;
+    const HEIGHT = 40;
+    const SCALED_WIDTH = SCALE * WIDTH;
+    const SCALED_HEIGHT = SCALE * HEIGHT;
+    const CYCLE_LOOP = [1.15, 2.15, 1.15, 4.15];
+    const FRAME_LIMIT = 12;
+    const FACING_DOWN = 2;
+    const FACING_UP = 3;
+    const FACING_LEFT = 0;
+    const FACING_RIGHT = 1;
+    const MOVEMENT_SPEED = 1;
+
+    let canvas = document.querySelector('canvas');
+    let ctx = canvas.getContext('2d');
+    let currentDirection = FACING_DOWN;
+    let keyPresses = {};
+    let currentLoopIndex = 0;
+    let frameCount = 0;
+    let positionX = 110;
+    let positionY = 105;
+    let img = new Image();    
+
+    window.addEventListener('keydown', keyDownListener, false);
+    function keyDownListener(event) {
+        keyPresses[event.key] = true;
+    }
+
+    window.addEventListener('keyup', keyUpListener, false);
+    function keyUpListener(event) {
+        keyPresses[event.key] = false;
+    }
+
+    function loadImage() {
+        img.src = 'robot-sprite-sheet-5-transparent.png';
+        img.onload = function() {
+            window.requestAnimationFrame(gameLoop);
+        }
+    }
+
+    function drawFrame(frameX, frameY, canvasX, canvasY) {
+        ctx.drawImage(img,
+            frameX * WIDTH, frameY * HEIGHT, WIDTH, HEIGHT,
+            canvasX, canvasY, SCALED_WIDTH, SCALED_HEIGHT);
+    }
+
+    loadImage();
+
+    function gameLoop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        let hasMoved = false;
+
+        if (keyPresses.ArrowUp || keyPresses.w ) {
+            moveCharacter(0, -MOVEMENT_SPEED, FACING_UP);
+            hasMoved = true;
+        } else if (keyPresses.ArrowDown || keyPresses.s) {
+            moveCharacter(0, MOVEMENT_SPEED, FACING_DOWN);
+            hasMoved = true;
+        }
+
+        if (keyPresses.ArrowLeft || keyPresses.a) {
+            moveCharacter(-MOVEMENT_SPEED, 0, FACING_LEFT);
+            hasMoved = true;
+        } else if (keyPresses.ArrowRight || keyPresses.d) {
+            moveCharacter(MOVEMENT_SPEED, 0, FACING_RIGHT);
+            hasMoved = true;
+        }
+
+        if (hasMoved) {
+            frameCount++;
+            if (frameCount >= FRAME_LIMIT) {
+                frameCount = 0;
+                currentLoopIndex++;
+                if (currentLoopIndex >= CYCLE_LOOP.length) {
+                    currentLoopIndex = 0;
+                }
+            }
+        }
+
+        if (!hasMoved) {
+            currentLoopIndex = 0;
+        }
+
+        drawFrame(currentDirection, CYCLE_LOOP[currentLoopIndex], positionX, positionY);
+        window.requestAnimationFrame(gameLoop);
+    }
+
+    function moveCharacter(deltaX, deltaY, direction) {
+        if (positionX + deltaX > 0 && positionX + SCALED_WIDTH + deltaX < canvas.width) {
+            positionX += deltaX;
+        }
+        if (positionY + deltaY > 0 && positionY + SCALED_HEIGHT + deltaY < canvas.height) {
+            positionY += deltaY;
+        }
+        currentDirection = direction;
+    }
+
+</script>
+
+</body>
+</html>
