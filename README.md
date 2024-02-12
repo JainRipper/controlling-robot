@@ -1,6 +1,6 @@
-![Demo](demo/demo.gif)
+![Demo](demo.gif)
 
 ## Features
 
-- Control with keyboard: S, W, D, A
+- Control with a keyboard: S, W, D, A
 
